@@ -1,5 +1,5 @@
 {
-	"ImportPath": "spotify_test",
+	"ImportPath": "spotify_test/main",
 	"GoVersion": "go1.10",
 	"GodepVersion": "v80",
 	"Packages": [
