@@ -26,7 +26,12 @@ func main() {
 	fmt.Printf("( 1 ) Client ID: %v\n", testVar)
 
 	http.HandleFunc("/", redirect )
-	err := http.ListenAndServe(":8080", nil)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	fmt.Println("Using port: " + port)
+	err := http.ListenAndServe(":" + port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
 	}
