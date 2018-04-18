@@ -68,4 +68,7 @@ func main() {
 	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
 
 	fmt.Println("You are logged in as:", user.ID)
+
+	// block forever
+	switch{}
 }
