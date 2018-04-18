@@ -53,6 +53,7 @@ func main() {
 	http.HandleFunc("/callback", completeAuth )
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		log.Println("Got request for:", r.URL.String())
+		http.ServeFile(w, r, "../favicon.ico")
 	})
 	go http.ListenAndServe(":" + port, nil)
 
