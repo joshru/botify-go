@@ -11,7 +11,8 @@ import (
 //playlist ID: 4jj4dm7CryepjBlKwT4dKe
 
 //const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
-const redirectURL = "http://localhost:8080/callback"
+//const redirectURL = "http://localhost:8080/callback"
+const redirectURL = "https://groupme-botify.herokuapp.com/"
 
 var (
 	clientID    = os.Getenv("CLIENT_ID")
@@ -48,7 +49,7 @@ func main() {
 	}
 	auth.SetAuthInfo(clientID, secretID)
 
-	http.HandleFunc("/callback", completeAuth )
+	http.HandleFunc("/", completeAuth )
 	//http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	//	log.Println("Got request for:", r.URL.String())
 	//})
