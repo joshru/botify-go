@@ -34,6 +34,7 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("State mismatch %s != %s\n", st, stateString)
 	}
 	client := auth.NewClient(token)
+
 	//fmt.Fprintf(w, "Login completed!")
 	fmt.Println("Login completed!")
 	ch <- &client
@@ -70,5 +71,5 @@ func main() {
 	fmt.Println("You are logged in as:", user.ID)
 
 	// block forever
-	switch{}
+	select {}
 }
