@@ -14,11 +14,8 @@ import (
 const redirectURL = "http://localhost:8080/callback"
 
 var (
-	// todo remember to remove secret id
-	//clientID    = os.Getenv("CLIENT_ID")
-	clientID    = "b968002074aa48c98c2cd6f63318fd9b"
-	//secretID    = os.Getenv("CLIENT_SECRET")
-	secretID    = "e3d4d39acf8f4eed9bd1ba0924c1ff96"
+	clientID    = os.Getenv("CLIENT_ID")
+	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
 	ch          = make(chan *spotify.Client)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
