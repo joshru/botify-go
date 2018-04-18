@@ -7,32 +7,67 @@ import (
 	"log"
 	"os"
 )
+//Random track ID:1IruBrVHO0XS9SfXGoYBXn
+//playlist ID: 4jj4dm7CryepjBlKwT4dKe
 
-func redirect(w http.ResponseWriter, r *http.Request) {
-	redirectURL := "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
-	clientID    := os.Getenv("CLIENT_ID")
-	secretID    := os.Getenv("CLIENT_SECRET")
-	fmt.Printf("( 2 ) Client ID: %v\n", clientID)
-	auth := spotify.NewAuthenticator(redirectURL, spotify.ScopeUserLibraryRead, spotify.ScopeUserFollowRead)
-	auth.SetAuthInfo(clientID, secretID)
+//const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
+const redirectURL = "http://localhost:8080/callback"
 
-	http.Redirect(w, r, auth.AuthURL("state-string"), http.StatusFound)
+var (
+	// todo remember to remove secret id
+	//clientID    = os.Getenv("CLIENT_ID")
+	clientID    = "b968002074aa48c98c2cd6f63318fd9b"
+	//secretID    = os.Getenv("CLIENT_SECRET")
+	secretID    = "e3d4d39acf8f4eed9bd1ba0924c1ff96"
+	stateString = "groupme_bot_state"
+	ch          = make(chan *spotify.Client)
+	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
+)
+
+// Begin Spotify authorization flow, after user logs in they will be redirected to a success page
+// https://godoc.org/github.com/zmb3/spotify#Authenticator
+func completeAuth(w http.ResponseWriter, r *http.Request) {
+	token, err := auth.Token(stateString, r)
+	if err != nil {
+		http.Error(w, "Couldn't get token", http.StatusForbidden)
+	}
+	if st := r.FormValue("state"); st != stateString {
+		http.NotFound(w, r)
+		log.Fatalf("State mismatch %s != %s\n", st, stateString)
+	}
+	client := auth.NewClient(token)
+	//fmt.Fprintf(w, "Login completed!")
+	fmt.Println("Login completed!")
+	ch <- &client
 }
-
+//https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
 func main() {
 	fmt.Println("Starting Botify!")
 
-	testVar := os.Getenv("CLIENT_ID")
-	fmt.Printf("( 1 ) Client ID: %v\n", testVar)
-
-	http.HandleFunc("/", redirect )
+	// fetch port from Heroku, or use 8080 if no port environment variable is set
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Println("Using port: " + port)
-	err := http.ListenAndServe(":" + port, nil)
+	auth.SetAuthInfo(clientID, secretID)
+
+	http.HandleFunc("/callback", completeAuth )
+	//http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	//	log.Println("Got request for:", r.URL.String())
+	//})
+	go http.ListenAndServe(":" + port, nil)
+
+	url := auth.AuthURL(stateString)
+	fmt.Println("Please log in to Spotify via:", url)
+
+	// wait for auth to complete
+	client := <- ch
+
+	user, err := client.CurrentUser()
 	if err != nil {
-		log.Fatal("ListenAndServe: ", err)
+		log.Fatal(err)
 	}
+	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
+
+	fmt.Println("You are logged in as:", user.ID)
 }
