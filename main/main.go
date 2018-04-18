@@ -51,8 +51,7 @@ func main() {
 	auth.SetAuthInfo(clientID, secretID)
 
 	http.HandleFunc("/callback", completeAuth )
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
+	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "../favicon.ico")
 	})
 	go http.ListenAndServe(":" + port, nil)
