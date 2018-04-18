@@ -7,12 +7,12 @@ import (
 	"log"
 	"os"
 )
-//Random track ID:1IruBrVHO0XS9SfXGoYBXn
+//Random track ID: 1IruBrVHO0XS9SfXGoYBXn
 //playlist ID: 4jj4dm7CryepjBlKwT4dKe
 
 //const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
 //const redirectURL = "http://localhost:8080/callback"
-const redirectURL = "https://groupme-botify.herokuapp.com/"
+const redirectURL = "https://groupme-botify.herokuapp.com/callback"
 
 var (
 	clientID    = os.Getenv("CLIENT_ID")
@@ -50,10 +50,10 @@ func main() {
 	}
 	auth.SetAuthInfo(clientID, secretID)
 
-	http.HandleFunc("/", completeAuth )
-	//http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-	//	log.Println("Got request for:", r.URL.String())
-	//})
+	http.HandleFunc("/callback", completeAuth )
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Println("Got request for:", r.URL.String())
+	})
 	go http.ListenAndServe(":" + port, nil)
 
 	url := auth.AuthURL(stateString)
