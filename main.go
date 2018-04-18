@@ -50,11 +50,13 @@ func main() {
 	}
 	auth.SetAuthInfo(clientID, secretID)
 
-	http.HandleFunc("/", completeAuth )
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		completeAuth(w, r)
+		http.ServeFile(w, r, "./index.html")
+	} )
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./favicon.ico")
-		http.ServeFile(w, r, "./index.html")
-	})
+	} )
 	go http.ListenAndServe(":" + port, nil)
 
 	url := auth.AuthURL(stateString)
