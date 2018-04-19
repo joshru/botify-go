@@ -56,7 +56,7 @@ func main() {
 	fmt.Println("Starting Botify!")
 
 	// fetch port from Heroku, or use 8080 if no port environment variable is set
-/*	port := os.Getenv("PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
@@ -82,7 +82,7 @@ func main() {
 		log.Fatal(err)
 	}
 	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
-	fmt.Println("You are logged in as:", user.ID)*/
+	fmt.Println("You are logged in as:", user.ID)
 
 	fmt.Println("Creating groupme bot")
 	commands := make([]bot.Command, 0)
