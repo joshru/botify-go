@@ -7,7 +7,7 @@
 	],
 	"Deps": [
 		{
-			"ImportPath": "github.com/sha1sum/golang_groupme_bot",
+			"ImportPath": "github.com/sha1sum/golang_groupme_bot/bot",
 			"Rev": "62a6b7bd245e5ae6dbff45b5f2e99f177bffef6c"
 		},
 		{
