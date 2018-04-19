@@ -21,6 +21,7 @@ var (
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
 	ch          = make(chan *spotify.Client)
+	gmChan		= make(chan string)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
 )
 
@@ -33,6 +34,7 @@ func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, messag
 		return
 	}
 	fmt.Println("Found message:", message.Text)
+	gmChan <- message.Text
 }
 
 // Begin Spotify authorization flow, after user logs in they will be redirected to a success page
@@ -52,6 +54,18 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Login completed!")
 	ch <- &client
 }
+
+func addTrackToPlaylist(client *spotify.Client, testMessage string) {
+	user, err := client.CurrentUser()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
+	fmt.Println("Track added. You are logged in as:", user.ID)
+	fmt.Println("Groupme test message:", testMessage)
+}
+
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
 func main() {
 	fmt.Println("Starting Botify!")
@@ -80,15 +94,11 @@ func main() {
 
 	// wait for auth to complete
 	client := <- ch
-	user, err := client.CurrentUser()
-	if err != nil {
-		log.Fatal(err)
-	}
+
 
 	srv.Shutdown(context.Background())
 
-	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
-	fmt.Println("You are logged in as:", user.ID)
+
 
 	fmt.Println("Creating groupme bot")
 	commands := make([]bot.Command, 0)
@@ -102,7 +112,10 @@ func main() {
 		BotID: "d01b6e91b7c35b66405ba58dbf",
 	}
 	commands = append(commands, songs)
-	go bot.Listen(commands)
+	bot.Listen(commands)
+
+	message := <- gmChan
+	addTrackToPlaylist(client, message)
 
 	// block forever
 	select {}
