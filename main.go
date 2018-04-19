@@ -84,10 +84,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
-	fmt.Println("You are logged in as:", user.ID)
 
 	srv.Shutdown(context.Background())
+
+	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
+	fmt.Println("You are logged in as:", user.ID)
 
 	fmt.Println("Creating groupme bot")
 	commands := make([]bot.Command, 0)
