@@ -7,6 +7,10 @@
 	],
 	"Deps": [
 		{
+			"ImportPath": "github.com/sha1sum/golang_groupme_bot/bot",
+			"Rev": "62a6b7bd245e5ae6dbff45b5f2e99f177bffef6c"
+		},
+		{
 			"ImportPath": "github.com/zmb3/spotify",
 			"Rev": "79deba8533f6a0e6545b3937667522d323aa6754"
 		},
