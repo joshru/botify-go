@@ -72,7 +72,7 @@ func main() {
 		http.ServeFile(w, r, "./favicon.ico")
 	} )
 	//go http.ListenAndServe(":" + port, nil)
-	srv := &http.Server{Addr: port}
+	srv := &http.Server{Addr: ":" + port}
 	go srv.ListenAndServe()
 
 	url := auth.AuthURL(stateString)
