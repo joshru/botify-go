@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"log"
 	"os"
-	"github.com/sha1sum/golang_groupme_bot/bot"
+	"github.com/sha1sum/golang_groupme_bot"
 )
 //Random track ID: 1IruBrVHO0XS9SfXGoYBXn
 //playlist ID: 4jj4dm7CryepjBlKwT4dKe
