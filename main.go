@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"github.com/sha1sum/golang_groupme_bot/bot"
+	"context"
 )
 //Random track ID: 1IruBrVHO0XS9SfXGoYBXn
 //playlist ID: 4jj4dm7CryepjBlKwT4dKe
@@ -70,20 +71,23 @@ func main() {
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./favicon.ico")
 	} )
-	go http.ListenAndServe(":" + port, nil)
+	//go http.ListenAndServe(":" + port, nil)
+	srv := &http.Server{Addr: port}
+	go srv.ListenAndServe()
 
 	url := auth.AuthURL(stateString)
 	fmt.Println("Please log in to Spotify via:", url)
 
 	// wait for auth to complete
 	client := <- ch
-
 	user, err := client.CurrentUser()
 	if err != nil {
 		log.Fatal(err)
 	}
 	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
 	fmt.Println("You are logged in as:", user.ID)
+
+	srv.Shutdown(context.Background())
 
 	fmt.Println("Creating groupme bot")
 	commands := make([]bot.Command, 0)
