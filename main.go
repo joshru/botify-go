@@ -56,7 +56,8 @@ func main() {
 	fmt.Println("Starting Botify!")
 
 	// fetch port from Heroku, or use 8080 if no port environment variable is set
-	port := os.Getenv("PORT")
+	//port := os.Getenv("PORT")
+	port := os.Getenv("SPOTIFY_PORT")
 	if port == "" {
 		port = "8080"
 	}
