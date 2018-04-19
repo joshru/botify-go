@@ -57,15 +57,17 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 
 func addTrackToPlaylist(client *spotify.Client) {
 	fmt.Println("Add function waiting on message")
-	testMessage := <- gmChan
-	user, err := client.CurrentUser()
-	if err != nil {
-		log.Fatal(err)
-	}
+	for {
+		testMessage := <- gmChan
+		user, err := client.CurrentUser()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
-	fmt.Println("Track added. You are logged in as:", user.ID)
-	fmt.Println("Groupme test message was:", testMessage)
+		client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
+		fmt.Println("Track added. You are logged in as:", user.ID)
+		fmt.Println("Groupme test message was:", testMessage)
+	}
 }
 
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
