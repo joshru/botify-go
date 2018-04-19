@@ -28,12 +28,12 @@ var (
 type Handler struct{}
 
 func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, message bot.IncomingMessage) {
-	fmt.Println("Handler called!")
 	// exit early if the received message was posted by a bot
 	if message.SenderType == "bot" {
 		return
 	}
-	fmt.Println("Found message:", message.Text)
+	fmt.Println("Handler found message:", message.Text)
+	// write message to channel so it can be seen by the track adding function
 	gmChan <- message.Text
 }
 
@@ -55,7 +55,9 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	ch <- &client
 }
 
-func addTrackToPlaylist(client *spotify.Client, testMessage string) {
+func addTrackToPlaylist(client *spotify.Client) {
+	fmt.Println("Add function waiting on message")
+	testMessage := <- gmChan
 	user, err := client.CurrentUser()
 	if err != nil {
 		log.Fatal(err)
@@ -63,7 +65,7 @@ func addTrackToPlaylist(client *spotify.Client, testMessage string) {
 
 	client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
 	fmt.Println("Track added. You are logged in as:", user.ID)
-	fmt.Println("Groupme test message:", testMessage)
+	fmt.Println("Groupme test message was:", testMessage)
 }
 
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
@@ -94,11 +96,9 @@ func main() {
 
 	// wait for auth to complete
 	client := <- ch
-
+	go addTrackToPlaylist(client)
 
 	srv.Shutdown(context.Background())
-
-
 
 	fmt.Println("Creating groupme bot")
 	commands := make([]bot.Command, 0)
@@ -106,16 +106,12 @@ func main() {
 		Triggers: []string {
 			"https://open.spotify",
 			"testing",
-			"",
 		},
 		Handler: new(Handler),
 		BotID: "d01b6e91b7c35b66405ba58dbf",
 	}
 	commands = append(commands, songs)
 	bot.Listen(commands)
-
-	message := <- gmChan
-	addTrackToPlaylist(client, message)
 
 	// block forever
 	select {}
