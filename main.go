@@ -97,7 +97,7 @@ func main() {
 		BotID: "d01b6e91b7c35b66405ba58dbf",
 	}
 	commands = append(commands, songs)
-	bot.Listen(commands)
+	go bot.Listen(commands)
 
 	// block forever
 	select {}
