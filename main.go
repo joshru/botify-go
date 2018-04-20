@@ -120,8 +120,7 @@ func main() {
 	commands := make([]bot.Command, 0)
 	songs := bot.Command{
 		Triggers: []string {
-			"https://open.spotify",
-			"testing",
+			"https://open.spotify.com/track",
 		},
 		Handler: new(Handler),
 		BotID: "d01b6e91b7c35b66405ba58dbf",
