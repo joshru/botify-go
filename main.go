@@ -58,11 +58,10 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 }
 
 func trackTrimmer(url string) string {
-	test := "https://open.spotify.com/track/290p5lpLAbMAr290S0P7gZ?si=bS_vQkcoScaL4nN01OoyEA"
 	startToken := "track/"
 	endToken :="?si="
 	matcher := regexp.MustCompile("track/(.*?)?si=")
-	matchedStr := matcher.FindString(test)
+	matchedStr := matcher.FindString(url)
 	fmt.Println(matchedStr)
 	trimmed := matchedStr[len(startToken):len(matchedStr) - len(endToken)]
 	fmt.Println("Trimmed:", trimmed)
