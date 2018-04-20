@@ -8,6 +8,7 @@ import (
 	"os"
 	"github.com/sha1sum/golang_groupme_bot/bot"
 	"context"
+	"regexp"
 )
 //Random track ID: 1IruBrVHO0XS9SfXGoYBXn
 //playlist ID: 4jj4dm7CryepjBlKwT4dKe
@@ -56,18 +57,31 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	ch <- &client
 }
 
+func trackTrimmer(url string) string {
+	test := "https://open.spotify.com/track/290p5lpLAbMAr290S0P7gZ?si=bS_vQkcoScaL4nN01OoyEA"
+	startToken := "track/"
+	endToken :="?si="
+	matcher := regexp.MustCompile("track/(.*?)?si=")
+	matchedStr := matcher.FindString(test)
+	fmt.Println(matchedStr)
+	trimmed := matchedStr[len(startToken):len(matchedStr) - len(endToken)]
+	fmt.Println("Trimmed:", trimmed)
+	return trimmed
+}
+
 func addTrackToPlaylist(client *spotify.Client) {
 	fmt.Println("Add function waiting on message")
 	for {
 		testMessage := <- gmChan
-		user, err := client.CurrentUser()
-		if err != nil {
-			log.Fatal(err)
-		}
+		//user, err := client.CurrentUser()
+		//if err != nil {
+		//	log.Fatal(err)
+		//}
 
-		client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", "1IruBrVHO0XS9SfXGoYBXn")
-		fmt.Println("Track added. You are logged in as:", user.ID)
-		fmt.Println("Groupme test message was:", testMessage)
+		// track id regex: track/(.*?)?si=
+		foundTrack := spotify.ID(trackTrimmer(testMessage))
+		client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", foundTrack)
+		fmt.Println("Found track ID:", foundTrack)
 	}
 }
 
