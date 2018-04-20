@@ -14,7 +14,8 @@ import (
 
 //const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
 //const redirectURL = "http://localhost:8080"
-const redirectURL = "https://groupme-botify.herokuapp.com"
+//const redirectURL = "https://groupme-botify.herokuapp.com"
+const redirectURL = "http://chinesefiredrill.org"
 
 var (
 	clientID    = os.Getenv("CLIENT_ID")
@@ -97,8 +98,8 @@ func main() {
 	fmt.Println("Please log in to Spotify via:", url)
 
 	// wait for auth to complete
-	client := <- ch
-	go addTrackToPlaylist(client)
+	//client := <- ch
+	go addTrackToPlaylist(<- ch)
 
 	srv.Shutdown(context.Background())
 
