@@ -16,7 +16,8 @@ import (
 //const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
 //const redirectURL = "http://localhost:8080"
 //const redirectURL = "https://groupme-botify.herokuapp.com"
-const redirectURL = "http://chinesefiredrill.org:8080"
+//const redirectURL = "http://josh.chinesefiredrill.org:8080"
+const redirectURL = "http://botify.sudont.org:8080"
 
 var (
 	clientID    = os.Getenv("CLIENT_ID")
