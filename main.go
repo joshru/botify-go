@@ -80,8 +80,13 @@ func addTrackToPlaylist(client *spotify.Client) {
 
 		// track id regex: track/(.*?)?si=
 		foundTrack := spotify.ID(trackTrimmer(testMessage))
+		trackID := trackTrimmer(testMessage)
+		trackObj, err := client.GetTrack(spotify.ID(trackID))
+		if err != nil {
+			fmt.Println("Unable to locate track:", trackID)
+		}
 		client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", foundTrack)
-		fmt.Println("Found track ID:", foundTrack)
+		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
 	}
 }
 
