@@ -33,10 +33,7 @@ func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, messag
 	}
 	fmt.Println("Handler found message:", message.Text)
 
-	// trim message
-	words := strings.Split(message.Text[1:], " ")
-
-	if words[0] == "!playlist" {
+	if message.Text == "!playlist" {
 		// post the playlist to the group
 		postPlaylist()
 		fmt.Println("Posting playlist to group.")
