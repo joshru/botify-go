@@ -18,13 +18,17 @@ var (
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
+	userID		= "rooshypooshy"
+	playlistID  = spotify.ID("4jj4dm7CryepjBlKwT4dKe")
 	ch          = make(chan *spotify.Client)
 	gmChan		= make(chan string)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
 )
 
+// default Handler instance is sufficient for handling posts to groupme
 type Handler struct{}
 
+// implement Handle function for Handler interface
 func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, message bot.IncomingMessage) {
 	// exit early if the received message was posted by a bot
 	if message.SenderType == "bot" {
@@ -40,9 +44,6 @@ func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, messag
 		// write message to channel so it can be seen by the track adding function
 		gmChan <- message.Text
 	}
-
-
-
 }
 
 // Begin Spotify authorization flow, after user logs in they will be redirected to a success page
@@ -58,44 +59,66 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	}
 	client := auth.NewClient(token)
 
-	//fmt.Fprintf(w, "Login completed!")
+	// log completion and write the client object to global channel
 	fmt.Println("Login completed!")
 	ch <- &client
 }
 
-// TODO: make this less shitty
+// trim the handled URL to extract song ID
 func trackTrimmer(url string) string {
 	startToken := "track/"
 	endToken :="?si="
+	// track id regex: track/(.*?)?si=
 	matcher := regexp.MustCompile("track/(.*?)?si=")
 	matchedStr := matcher.FindString(url)
 	trimmed := matchedStr[len(startToken):len(matchedStr) - len(endToken)]
 	return trimmed
 }
 
+// checks for duplicates in the playlist. True if duplicate, false otherwise
+func checkForDuplicates(track *spotify.FullTrack, playlist []spotify.PlaylistTrack) bool {
+	for _, element := range playlist {
+		if element.Track.Name == track.Name {
+			postText("Reeeepost")
+			fmt.Println(track.Name + " is a repost, ignoring")
+			return true
+		}
+	}
+	return false
+}
+
+// adds the linked track to the playlist
 func addTrackToPlaylist(client *spotify.Client) {
-	fmt.Println("Add function waiting on message")
+	// infinite loop runs in separate goroutine
 	for {
 		trackURL := <- gmChan
-		//user, err := client.CurrentUser()
-		//if err != nil {
-		//	log.Fatal(err)
-		//}
 
-		// track id regex: track/(.*?)?si=
 		foundTrack := spotify.ID(trackTrimmer(trackURL))
 		trackID := trackTrimmer(trackURL)
 		trackObj, err := client.GetTrack(spotify.ID(trackID))
+		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
 		if err != nil {
 			fmt.Println("Unable to locate track:", trackID)
 		}
-		client.AddTracksToPlaylist("rooshypooshy", "4jj4dm7CryepjBlKwT4dKe", foundTrack)
-		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
+
+		playlistTracks, _ := client.GetPlaylistTracks(userID, playlistID)
+		isUnique := checkForDuplicates(trackObj, playlistTracks.Tracks)
+
+		if isUnique {
+			client.AddTracksToPlaylist(userID, playlistID, foundTrack)
+		}
+
 	}
 }
 
+// posts a link to the playlist
 func postPlaylist() {
 	msg := []*bot.OutgoingMessage{{Text: "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe"}}
+	bot.PostMessage(msg[0], botID)
+}
+
+func postText(m string) {
+	msg := []*bot.OutgoingMessage{{Text: m}}
 	bot.PostMessage(msg[0], botID)
 }
 
@@ -125,7 +148,6 @@ func main() {
 	fmt.Println("Please log in to Spotify via:", url)
 
 	// wait for auth to complete
-	//client := <- ch
 	go addTrackToPlaylist(<- ch)
 
 	srv.Shutdown(context.Background())
@@ -143,6 +165,6 @@ func main() {
 	commands = append(commands, songs)
 	bot.Listen(commands)
 
-	// block forever
+	// block forever (not sure if this is still necessary)
 	select {}
 }
