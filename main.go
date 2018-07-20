@@ -9,17 +9,13 @@ import (
 	"github.com/sha1sum/golang_groupme_bot/bot"
 	"context"
 	"regexp"
+	"strings"
 )
-//Random track ID: 1IruBrVHO0XS9SfXGoYBXn
-//playlist ID: 4jj4dm7CryepjBlKwT4dKe
 
-//const redirectURL = "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe?si=tiUyT3x-QWSJEGBvUEQ7xw"
-//const redirectURL = "http://localhost:8080"
-//const redirectURL = "https://groupme-botify.herokuapp.com"
-//const redirectURL = "http://josh.chinesefiredrill.org:8080"
 const redirectURL = "http://botify.sudont.org:8080"
 
 var (
+	botID		= "d01b6e91b7c35b66405ba58dbf"
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
@@ -36,8 +32,21 @@ func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, messag
 		return
 	}
 	fmt.Println("Handler found message:", message.Text)
-	// write message to channel so it can be seen by the track adding function
-	gmChan <- message.Text
+
+	// trim message
+	words := strings.Split(message.Text[1:], " ")
+
+	if words[0] == "!playlist" {
+		// post the playlist to the group
+		postPlaylist()
+		fmt.Println("Posting playlist to group.")
+	} else {
+		// write message to channel so it can be seen by the track adding function
+		gmChan <- message.Text
+	}
+
+
+
 }
 
 // Begin Spotify authorization flow, after user logs in they will be redirected to a success page
@@ -58,29 +67,28 @@ func completeAuth(w http.ResponseWriter, r *http.Request) {
 	ch <- &client
 }
 
+// TODO: make this less shitty
 func trackTrimmer(url string) string {
 	startToken := "track/"
 	endToken :="?si="
 	matcher := regexp.MustCompile("track/(.*?)?si=")
 	matchedStr := matcher.FindString(url)
-	fmt.Println(matchedStr)
 	trimmed := matchedStr[len(startToken):len(matchedStr) - len(endToken)]
-	fmt.Println("Trimmed:", trimmed)
 	return trimmed
 }
 
 func addTrackToPlaylist(client *spotify.Client) {
 	fmt.Println("Add function waiting on message")
 	for {
-		testMessage := <- gmChan
+		trackURL := <- gmChan
 		//user, err := client.CurrentUser()
 		//if err != nil {
 		//	log.Fatal(err)
 		//}
 
 		// track id regex: track/(.*?)?si=
-		foundTrack := spotify.ID(trackTrimmer(testMessage))
-		trackID := trackTrimmer(testMessage)
+		foundTrack := spotify.ID(trackTrimmer(trackURL))
+		trackID := trackTrimmer(trackURL)
 		trackObj, err := client.GetTrack(spotify.ID(trackID))
 		if err != nil {
 			fmt.Println("Unable to locate track:", trackID)
@@ -90,11 +98,15 @@ func addTrackToPlaylist(client *spotify.Client) {
 	}
 }
 
+func postPlaylist() {
+	msg := []*bot.OutgoingMessage{{Text: "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe"}}
+	bot.PostMessage(msg[0], botID)
+}
+
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
 func main() {
 	fmt.Println("Starting Botify!")
 
-	// fetch port from Heroku, or use 8080 if no port environment variable is set
 	//port := os.Getenv("PORT")
 	port := os.Getenv("PORT")
 	if port == "" {
@@ -127,9 +139,10 @@ func main() {
 	songs := bot.Command{
 		Triggers: []string {
 			"https://open.spotify.com/track",
+			"!playlist",
 		},
 		Handler: new(Handler),
-		BotID: "d01b6e91b7c35b66405ba58dbf",
+		BotID: botID,
 	}
 	commands = append(commands, songs)
 	bot.Listen(commands)
