@@ -14,7 +14,7 @@ import (
 const redirectURL = "http://botify.sudont.org:8080"
 
 var (
-	botID		= "d1751969b118bd1dac42bdd5c5"
+	botID		= "d01b6e91b7c35b66405ba58dbf"
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
@@ -96,18 +96,16 @@ func addTrackToPlaylist(client *spotify.Client) {
 		foundTrack := spotify.ID(trackTrimmer(trackURL))
 		trackID := trackTrimmer(trackURL)
 		trackObj, err := client.GetTrack(spotify.ID(trackID))
+		if err != nil {	fmt.Println("Unable to locate track:", trackID) }
+
 		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
-		if err != nil {
-			fmt.Println("Unable to locate track:", trackID)
-		}
 
 		playlistTracks, _ := client.GetPlaylistTracks(userID, playlistID)
-		isUnique := checkForDuplicates(trackObj, playlistTracks.Tracks)
+		isRepost := checkForDuplicates(trackObj, playlistTracks.Tracks)
 
-		if isUnique {
+		if !isRepost {
 			client.AddTracksToPlaylist(userID, playlistID, foundTrack)
 		}
-
 	}
 }
 
