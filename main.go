@@ -14,7 +14,7 @@ import (
 const redirectURL = "http://botify.sudont.org:8080"
 
 var (
-	botID		= "d01b6e91b7c35b66405ba58dbf"
+	botID		= "d1751969b118bd1dac42bdd5c5"
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
