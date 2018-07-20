@@ -9,7 +9,6 @@ import (
 	"github.com/sha1sum/golang_groupme_bot/bot"
 	"context"
 	"regexp"
-	"strings"
 )
 
 const redirectURL = "http://botify.sudont.org:8080"
