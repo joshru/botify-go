@@ -79,7 +79,6 @@ func trackTrimmer(url string) string {
 func checkForDuplicates(track *spotify.FullTrack, playlist []spotify.PlaylistTrack) bool {
 	for _, element := range playlist {
 		if element.Track.Name == track.Name {
-			postText("Reeeepost")
 			fmt.Println(track.Name + " is a repost, ignoring")
 			return true
 		}
