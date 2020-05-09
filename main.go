@@ -9,6 +9,7 @@ import (
     "github.com/bwmarrin/discordgo"
 	"context"
 	"regexp"
+    "strings"
 )
 
 const redirectURL = "http://botify.sudont.org:8080"
@@ -35,7 +36,8 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
     } else if m.Content == "!playlist" {
         s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
-	} else {
+	} else if strings.Contains(m.Content, "open.spotify.com") {
+        fmt.Println("Found spotify link, handling...")
 		gmChan <- m.Content
 	}
 
