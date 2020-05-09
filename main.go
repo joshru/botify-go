@@ -18,7 +18,7 @@ var (
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
 	userID		= "rooshypooshy"
-	playlistID  = spotify.ID("4jj4dm7CryepjBlKwT4dKe")
+	playlistID  = spotify.ID("2KnpXXFuYrf9zEItCMaQAd")
 	ch          = make(chan *spotify.Client)
 	gmChan		= make(chan string)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
@@ -31,7 +31,7 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "!old_playlist" {
+	if m.Content == "!old" {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
     } else if m.Content == "!playlist" {
         s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
@@ -90,7 +90,7 @@ func addTrackToPlaylist(client *spotify.Client) {
 		foundTrack := spotify.ID(trackTrimmer(trackURL))
 		trackID := trackTrimmer(trackURL)
 		trackObj, err := client.GetTrack(spotify.ID(trackID))
-		if err != nil {	fmt.Println("Unable to locate track:", trackID) }
+		if err != nil {	fmt.Println("Unable to locate track: {}, {}", trackID, err) }
 
 		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
 
@@ -155,20 +155,6 @@ func main() {
         return
     }
 	fmt.Println("Bot is now running...")
-
-
-	// fmt.Println("Creating groupme bot")
-	// commands := make([]bot.Command, 0)
-	// songs := bot.Command{
-	// 	Triggers: []string {
-	// 		"https://open.spotify.com/track",
-	// 		"!playlist",
-	// 	},
-	// 	Handler: new(Handler),
-	// 	BotID: botID,
-	// }
-	// commands = append(commands, songs)
-	// bot.Listen(commands)
 
 	// block forever (not sure if this is still necessary)
 	select {}
