@@ -25,13 +25,18 @@ var (
 )
 
 func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
-	fmt.Println("handling...")
+	
+	// Ignore any messages that come from the bot itself
+	if m.Author.ID == s.State.User.ID {
+		return
+	}
+
 	if m.Content == "!old_playlist" {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
     } else if m.Content == "!playlist" {
         s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
 	} else {
-		fmt.Println("Uninteresting messages")
+		gmChan <- m.Content
 	}
 
 }
@@ -98,17 +103,6 @@ func addTrackToPlaylist(client *spotify.Client) {
 	}
 }
 
-// posts a link to the playlist
-// func postPlaylist() {
-// 	msg := []*bot.OutgoingMessage{{Text: "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe"}}
-// 	bot.PostMessage(msg[0], botID)
-// }
-
-// func postText(m string) {
-// 	msg := []*bot.OutgoingMessage{{Text: m}}
-// 	bot.PostMessage(msg[0], botID)
-// }
-
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
 func main() {
 	fmt.Println("Starting Botify!")
@@ -161,11 +155,6 @@ func main() {
         return
     }
 	fmt.Println("Bot is now running...")
-	// sc := make(chan os.Signal, 1)
-	// signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
-	// <-sc
-	
-	// bot.Close()
 
 
 	// fmt.Println("Creating groupme bot")
