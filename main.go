@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"log"
 	"os"
-//	"github.com/sha1sum/golang_groupme_bot/bot"
     "github.com/bwmarrin/discordgo"
 	"context"
 	"regexp"
@@ -15,7 +14,7 @@ import (
 const redirectURL = "http://botify.sudont.org:8080"
 
 var (
-	botID		= "d1751969b118bd1dac42bdd5c5"
+	botID		= "NzA4NzU2NjQzNzc2NjkyMzA0.XrcAqA.uvU4aQpEwrT38QoPCWN09xQfIOs"
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
@@ -30,21 +29,31 @@ var (
 type Handler struct{}
 
 // implement Handle function for Handler interface
-func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, message bot.IncomingMessage) {
-	// exit early if the received message was posted by a bot
-	if message.SenderType == "bot" {
-		return
-	}
-	fmt.Println("Handler found message:", message.Text)
+// func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, message bot.IncomingMessage) {
+// 	// exit early if the received message was posted by a bot
+// 	if message.SenderType == "bot" {
+// 		return
+// 	}
+// 	fmt.Println("Handler found message:", message.Text)
 
-	if message.Text == "!playlist" {
-		// post the playlist to the group
-		postPlaylist()
-		fmt.Println("Posting playlist to group.")
+// 	if message.Text == "!playlist" {
+// 		// post the playlist to the group
+// 		postPlaylist()
+// 		fmt.Println("Posting playlist to group.")
+// 	} else {
+// 		// write message to channel so it can be seen by the track adding function
+// 		gmChan <- message.Text
+// 	}
+// }
+
+func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
+	
+	if m.Content == "!playlist" {
+		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
 	} else {
-		// write message to channel so it can be seen by the track adding function
-		gmChan <- message.Text
+		fmt.Println("Uninteresting messages")
 	}
+
 }
 
 // Begin Spotify authorization flow, after user logs in they will be redirected to a success page
@@ -110,15 +119,15 @@ func addTrackToPlaylist(client *spotify.Client) {
 }
 
 // posts a link to the playlist
-func postPlaylist() {
-	msg := []*bot.OutgoingMessage{{Text: "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe"}}
-	bot.PostMessage(msg[0], botID)
-}
+// func postPlaylist() {
+// 	msg := []*bot.OutgoingMessage{{Text: "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe"}}
+// 	bot.PostMessage(msg[0], botID)
+// }
 
-func postText(m string) {
-	msg := []*bot.OutgoingMessage{{Text: m}}
-	bot.PostMessage(msg[0], botID)
-}
+// func postText(m string) {
+// 	msg := []*bot.OutgoingMessage{{Text: m}}
+// 	bot.PostMessage(msg[0], botID)
+// }
 
 //https://open.spotify.com/track/6dHatCnuOb1TdBIeJTK3Y0?si=V_PGrzUEQy2BXNZGY33YnA
 func main() {
@@ -150,18 +159,34 @@ func main() {
 
 	srv.Shutdown(context.Background())
 
-	fmt.Println("Creating groupme bot")
-	commands := make([]bot.Command, 0)
-	songs := bot.Command{
-		Triggers: []string {
-			"https://open.spotify.com/track",
-			"!playlist",
-		},
-		Handler: new(Handler),
-		BotID: botID,
+	fmt.Println("Creating discord bot")
+	bot, err := discordgo.New("Bot" + botID)
+	if err != nil {
+		fmt.Println("Error creating Discord session, ", err)
+		return
 	}
-	commands = append(commands, songs)
-	bot.Listen(commands)
+
+	bot.AddHandler(handle)
+	fmt.Println("Bot is now running...")
+	// sc := make(chan os.Signal, 1)
+	// signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
+	// <-sc
+	
+	// bot.Close()
+
+
+	// fmt.Println("Creating groupme bot")
+	// commands := make([]bot.Command, 0)
+	// songs := bot.Command{
+	// 	Triggers: []string {
+	// 		"https://open.spotify.com/track",
+	// 		"!playlist",
+	// 	},
+	// 	Handler: new(Handler),
+	// 	BotID: botID,
+	// }
+	// commands = append(commands, songs)
+	// bot.Listen(commands)
 
 	// block forever (not sure if this is still necessary)
 	select {}
