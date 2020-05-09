@@ -14,7 +14,6 @@ import (
 const redirectURL = "http://botify.sudont.org:8080"
 
 var (
-	botID		= "NzA4NzU2NjQzNzc2NjkyMzA0.XrcAqA.uvU4aQpEwrT38QoPCWN09xQfIOs"
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
@@ -25,31 +24,12 @@ var (
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
 )
 
-// default Handler instance is sufficient for handling posts to groupme
-type Handler struct{}
-
-// implement Handle function for Handler interface
-// func (handler Handler) Handle(term string, c chan []*bot.OutgoingMessage, message bot.IncomingMessage) {
-// 	// exit early if the received message was posted by a bot
-// 	if message.SenderType == "bot" {
-// 		return
-// 	}
-// 	fmt.Println("Handler found message:", message.Text)
-
-// 	if message.Text == "!playlist" {
-// 		// post the playlist to the group
-// 		postPlaylist()
-// 		fmt.Println("Posting playlist to group.")
-// 	} else {
-// 		// write message to channel so it can be seen by the track adding function
-// 		gmChan <- message.Text
-// 	}
-// }
-
 func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
-	
-	if m.Content == "!playlist" {
+	fmt.Println("handling...")
+	if m.Content == "!old_playlist" {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
+    } else if m.Content == "!playlist" {
+        s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
 	} else {
 		fmt.Println("Uninteresting messages")
 	}
@@ -159,14 +139,27 @@ func main() {
 
 	srv.Shutdown(context.Background())
 
+    bot_ID := os.Getenv("BOT_ID")
+    if bot_ID == "" {
+        fmt.Println("Unable to get Bot_ID!! Exiting...")
+        return
+    }
+
 	fmt.Println("Creating discord bot")
-	bot, err := discordgo.New("Bot" + botID)
+	bot, err := discordgo.New("Bot " + bot_ID)
 	if err != nil {
 		fmt.Println("Error creating Discord session, ", err)
 		return
 	}
+    
+    fmt.Println("ID: ", bot_ID)
 
 	bot.AddHandler(handle)
+    err = bot.Open()
+    if err != nil {
+        fmt.Println("Error opening connection, ", err)
+        return
+    }
 	fmt.Println("Bot is now running...")
 	// sc := make(chan os.Signal, 1)
 	// signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
