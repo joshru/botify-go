@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"log"
 	"os"
-	"github.com/sha1sum/golang_groupme_bot/bot"
+//	"github.com/sha1sum/golang_groupme_bot/bot"
+    "github.com/bwmarrin/discordgo"
 	"context"
 	"regexp"
 )
