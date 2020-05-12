@@ -36,9 +36,10 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
     } else if m.Content == "!playlist" {
         s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
-	} else if strings.Contains(m.Content, "open.spotify.com") {
+	} else if strings.Contains(m.Content, "open.spotify.com/track") {
         fmt.Println("Found spotify link, handling...")
 		gmChan <- m.Content
+		s.MessageReactionAdd(m.ChannelID, m.ID, "👍")
 	}
 
 }
@@ -96,11 +97,13 @@ func addTrackToPlaylist(client *spotify.Client) {
 
 		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
 
-		playlistTracks, _ := client.GetPlaylistTracks(userID, playlistID)
+		// playlistTracks, _ := client.GetPlaylistTracks(userID, playlistID)
+		playlistTracks, _ := client.GetPlaylistTracks(playlistID)
 		isRepost := checkForDuplicates(trackObj, playlistTracks.Tracks)
 
 		if !isRepost {
-			client.AddTracksToPlaylist(userID, playlistID, foundTrack)
+			// client.AddTracksToPlaylist(userID, playlistID, foundTrack)
+			client.AddTracksToPlaylist(playlistID, foundTrack)
 		}
 	}
 }
