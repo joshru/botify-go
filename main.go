@@ -14,6 +14,11 @@ import (
 
 const redirectURL = "http://botify.sudont.org:8080"
 
+type song struct {
+	trackURL string
+	playlistID spotify.ID
+}
+
 var (
 	clientID    = os.Getenv("CLIENT_ID")
 	secretID    = os.Getenv("CLIENT_SECRET")
@@ -21,9 +26,26 @@ var (
 	userID		= "rooshypooshy"
 	playlistID  = spotify.ID("2KnpXXFuYrf9zEItCMaQAd")
 	ch          = make(chan *spotify.Client)
-	gmChan		= make(chan string)
+	gmChan		= make(chan *song)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
 )
+
+func getPlaylistID(guildID string) spotify.ID {
+	if guildID == "322958610068144132" {
+		return spotify.ID("2KnpXXFuYrf9zEItCMaQAd")
+	
+	} else if guildID == "704788845740425248" {
+		return spotify.ID("7DzL5ZJAjSlEkkSpxeoukF")
+	
+	} else {
+		fmt.Println("Failed to find playlist for Guild ID: {}", guildID)
+		return spotify.ID("")
+	}
+}
+
+func postPlaylist(guildID string) {
+
+}
 
 func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
@@ -34,11 +56,16 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	if m.Content == "!old" {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
+
     } else if m.Content == "!playlist" {
-        s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
+		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
+		
 	} else if strings.Contains(m.Content, "open.spotify.com/track") {
-        fmt.Println("Found spotify link, handling...")
-		gmChan <- m.Content
+		fmt.Println("Found spotify link, handling...")
+		posted_song := new(song)
+		posted_song.trackURL = m.Content
+		posted_song.playlistID = getPlaylistID(m.GuildID)
+		gmChan <- posted_song
 		s.MessageReactionAdd(m.ChannelID, m.ID, "👍")
 	}
 
@@ -88,22 +115,20 @@ func checkForDuplicates(track *spotify.FullTrack, playlist []spotify.PlaylistTra
 func addTrackToPlaylist(client *spotify.Client) {
 	// infinite loop runs in separate goroutine
 	for {
-		trackURL := <- gmChan
+		posted_song := <- gmChan
 
-		foundTrack := spotify.ID(trackTrimmer(trackURL))
-		trackID := trackTrimmer(trackURL)
+		foundTrack := spotify.ID(trackTrimmer(posted_song.trackURL))
+		trackID := trackTrimmer(posted_song.trackURL)
 		trackObj, err := client.GetTrack(spotify.ID(trackID))
 		if err != nil {	fmt.Println("Unable to locate track: {}, {}", trackID, err) }
 
 		fmt.Println("Found track:", trackObj.SimpleTrack.Name)
 
-		// playlistTracks, _ := client.GetPlaylistTracks(userID, playlistID)
-		playlistTracks, _ := client.GetPlaylistTracks(playlistID)
+		playlistTracks, _ := client.GetPlaylistTracks(posted_song.playlistID)
 		isRepost := checkForDuplicates(trackObj, playlistTracks.Tracks)
 
 		if !isRepost {
-			// client.AddTracksToPlaylist(userID, playlistID, foundTrack)
-			client.AddTracksToPlaylist(playlistID, foundTrack)
+			client.AddTracksToPlaylist(posted_song.playlistID, foundTrack)
 		}
 	}
 }
@@ -112,7 +137,6 @@ func addTrackToPlaylist(client *spotify.Client) {
 func main() {
 	fmt.Println("Starting Botify!")
 
-	//port := os.Getenv("PORT")
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
@@ -126,14 +150,15 @@ func main() {
 	http.HandleFunc("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		http.ServeFile(w, r, "./favicon.ico")
 	} )
-	//go http.ListenAndServe(":" + port, nil)
+
+	// Start http server for authentication redirect
 	srv := &http.Server{Addr: ":" + port}
 	go srv.ListenAndServe()
 
 	url := auth.AuthURL(stateString)
 	fmt.Println("Please log in to Spotify via:", url)
 
-	// wait for auth to complete
+	// channel will wait for auth to complete
 	go addTrackToPlaylist(<- ch)
 
 	srv.Shutdown(context.Background())
@@ -150,9 +175,8 @@ func main() {
 		fmt.Println("Error creating Discord session, ", err)
 		return
 	}
-    
-    fmt.Println("ID: ", bot_ID)
 
+	// add message handler callback
 	bot.AddHandler(handle)
     err = bot.Open()
     if err != nil {
@@ -161,6 +185,6 @@ func main() {
     }
 	fmt.Println("Bot is now running...")
 
-	// block forever (not sure if this is still necessary)
+	// block forever (not sure if this is necessary)
 	select {}
 }
