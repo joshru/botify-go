@@ -44,10 +44,6 @@ func getPlaylistID(guildID string) spotify.ID {
 	}
 }
 
-func postPlaylist(guildID string) {
-
-}
-
 func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 	
 	// Ignore any messages that come from the bot itself
@@ -55,11 +51,15 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	if m.Content == "!old" {
+	if m.Content == "!old" && m.GuildID == "322958610068144132" {
 		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/user/rooshypooshy/playlist/4jj4dm7CryepjBlKwT4dKe")
 
     } else if m.Content == "!playlist" {
-		s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
+		if m.GuildID == "322958610068144132" {
+			s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/2KnpXXFuYrf9zEItCMaQAd?si=CRyzpVbDTGiH9iCP57g8uw")
+		} else if m.GuildID == "654773487155544068" {
+			s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/6K1wQP7FDAwJKN6aM4TDL1?si=z2FGEYOFSxGQz5o9F2fEaA")
+		}
 		
 	} else if strings.Contains(m.Content, "open.spotify.com/track") {
 		fmt.Println("Found spotify link, handling...")
