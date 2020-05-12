@@ -24,18 +24,19 @@ var (
 	secretID    = os.Getenv("CLIENT_SECRET")
 	stateString = "groupme_bot_state"
 	userID		= "rooshypooshy"
-	playlistID  = spotify.ID("2KnpXXFuYrf9zEItCMaQAd")
 	ch          = make(chan *spotify.Client)
 	gmChan		= make(chan *song)
 	auth = spotify.NewAuthenticator(redirectURL, spotify.ScopeUserReadPrivate, spotify.ScopeUserLibraryRead, spotify.ScopePlaylistModifyPublic)
 )
 
 func getPlaylistID(guildID string) spotify.ID {
+	// main chat
 	if guildID == "322958610068144132" {
 		return spotify.ID("2KnpXXFuYrf9zEItCMaQAd")
 	
-	} else if guildID == "704788845740425248" {
-		return spotify.ID("7DzL5ZJAjSlEkkSpxeoukF")
+	// underwater rocket squad
+	} else if guildID == "654773487155544068" {
+		return spotify.ID("6K1wQP7FDAwJKN6aM4TDL1")
 	
 	} else {
 		fmt.Println("Failed to find playlist for Guild ID: {}", guildID)
