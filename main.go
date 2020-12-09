@@ -61,7 +61,7 @@ func handle(s *discordgo.Session, m *discordgo.MessageCreate) {
             s.ChannelMessageSend(m.ChannelID, "https://open.spotify.com/playlist/6K1wQP7FDAwJKN6aM4TDL1?si=z2FGEYOFSxGQz5o9F2fEaA")
         }
 
-    }  else if (m.Author.ID = "111360053654638592") {
+    }  else if (m.Author.ID == "111360053654638592") {
         s.MessageReactionAdd(m.ChannelID, m.ID, "👎")
     } else if strings.Contains(m.Content, "open.spotify.com/track") {
         fmt.Println("Found spotify link, handling...")
